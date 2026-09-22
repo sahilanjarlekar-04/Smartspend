@@ -6,7 +6,7 @@ A full-stack personal finance and expense management web application developed f
 
 ## 🌟 Tech Stack
 
-- **Frontend**: React (Vite), Vanilla CSS3 (Glassmorphism Dark Theme design system), Lucide React Icons.
+- **Frontend**: React (Vite), React Router, Vanilla CSS3 (Glassmorphism Dark Theme design system), Lucide React Icons.
 - **Backend**: Java 21, Spring Boot 3.2 (Spring Web, Spring Data JPA, REST Controller, CORS WebConfig).
 - **Database**: MySQL Server (supported via JDBC) / H2 In-Memory Database (built-in zero setup).
 
@@ -23,12 +23,18 @@ expense-tracker-fullstack/
 │           ├── java/com/expensetracker/
 │           │   ├── ExpenseTrackerApplication.java
 │           │   ├── config/WebConfig.java          # CORS Mapping
-│           │   ├── controller/TransactionController.java # REST APIs
+│           │   ├── controller/AuthController.java# User Registration & Login REST APIs
+│           │   ├── controller/TransactionController.java # Transaction REST APIs
+│           │   ├── dto/AuthRequest.java           # Authentication Payload DTO
+│           │   ├── dto/AuthResponse.java          # Authentication Response DTO
 │           │   ├── dto/SummaryResponse.java       # Financial Stats DTO
-│           │   ├── model/Transaction.java         # JPA Entity
+│           │   ├── model/Transaction.java         # JPA Entity (Transactions)
 │           │   ├── model/TransactionType.java     # Enum (INCOME/EXPENSE)
+│           │   ├── model/User.java                # JPA Entity (Users)
 │           │   ├── repository/TransactionRepository.java # JPA Repository
-│           │   └── service/TransactionService.java # Business Logic
+│           │   ├── repository/UserRepository.java# User Repository
+│           │   ├── service/TransactionService.java # Business Logic
+│           │   └── service/UserService.java      # Auth & Registration Logic
 │           └── resources/
 │               ├── application.properties         # MySQL / Database Config
 │               └── data.sql                        # Initial Sample Dataset
@@ -38,16 +44,21 @@ expense-tracker-fullstack/
     ├── package.json
     ├── vite.config.js
     └── src/
-        ├── App.jsx                      # Main Dashboard Component
+        ├── App.jsx                      # Main Dashboard Component & Router
         ├── index.css                    # Modern Glassmorphic CSS System
         ├── services/api.js              # Fetch REST API Integration Layer
-        └── components/
-            ├── Navbar.jsx               # Header & Add Transaction Button
+        ├── components/
+            ├── Navbar.jsx               # Header & Navigation Links
             ├── DashboardSummary.jsx     # Net Balance, Income & Expense Cards
             ├── TransactionForm.jsx      # Modal Form for Add / Edit Record
             ├── TransactionList.jsx      # Search, Filter & Table View
             ├── AnalyticsChart.jsx       # Category Expense Breakdown Visual
+            ├── LoginPage.jsx            # User Authentication & Sign-Up Component
             └── Toast.jsx                # Success Notification Alerts
+        └── pages/
+            ├── DashboardPage.jsx        # Main Overview Page
+            ├── TransactionsPage.jsx     # Full Filterable Data Table Page
+            └── AnalyticsPage.jsx        # Category Analytics Breakdown Page
 ```
 
 ---
@@ -58,18 +69,12 @@ expense-tracker-fullstack/
 Make sure your MySQL server is running on `localhost:3306`.
 - Database Name: `expensetracker_db` (Spring Boot will automatically create it if it doesn't exist).
 - Default Username in `application.properties`: `root`
-- Default Password in `application.properties`: `root` (Change this in `backend/src/main/resources/application.properties` to match your MySQL password if needed).
-
-> *Note: If MySQL is not running, you can also uncomment the H2 database lines in `application.properties` to run zero-setup in-memory database!*
+- Default Password in `application.properties`: `root`
 
 ### 2. Start the Backend (Spring Boot)
 Open terminal in `expense-tracker-fullstack/backend`:
 ```bash
-# If Maven is installed:
-mvn spring-boot:run
-
-# Or compile and run using Java:
-javac -d target/classes -cp ...
+.\mvnw.cmd spring-boot:run
 ```
 The REST API will start at: `http://localhost:8080/api/transactions`
 
@@ -86,18 +91,10 @@ Open your browser at: `http://localhost:5173`
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/transactions` | Fetch all logged transactions (sorted by latest date) |
-| `GET` | `/api/transactions/summary` | Fetch Net Balance, Total Income, Total Expenses, and Category Breakdown |
-| `GET` | `/api/transactions/{id}` | Get transaction details by ID |
+| `POST` | `/api/auth/register` | Register a new user account |
+| `POST` | `/api/auth/login` | Authenticate user credentials |
+| `GET` | `/api/transactions` | Fetch all logged transactions |
+| `GET` | `/api/transactions/summary` | Fetch Net Balance, Total Income, Total Expenses |
 | `POST` | `/api/transactions` | Create a new transaction |
 | `PUT` | `/api/transactions/{id}` | Edit / Update an existing transaction |
 | `DELETE` | `/api/transactions/{id}` | Delete a transaction record from database |
-
----
-
-## ✨ Features Implemented
-1. **Financial Metrics Dashboard**: Live dynamic computation of Net Balance, Total Income, Total Expenses, and Database Transaction Counts.
-2. **Category Expense Analytics**: Visual breakdown of category-wise spending percentage progress bars.
-3. **Full CRUD Operations**: Modal interface allowing users to create new income/expense entries, edit existing entries, and remove records.
-4. **Live Search & Filters**: Instant search by keyword, transaction type (Income/Expense), and category dropdown.
-5. **CORS Enabled**: Configured Spring MVC `WebConfig` for cross-origin request handling.
